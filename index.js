@@ -16,7 +16,7 @@ connection.connect((error) => {
 
 // ---VIEW FUNCTIONS---
 
-//view all employees
+// view all employees
 const viewAllEmployees = () => {
     const query = `
     SELECT e.id, e.first_name, e.last_name, role.title, department.name AS department, salary, IFNULL(concat(m.first_name, ' ', m.last_name), 'N/A') AS manager
@@ -31,15 +31,47 @@ const viewAllEmployees = () => {
     connection.query(query, (error, results) => {
         if (error) throw error;
 
+        console.log('\n');
         console.table(results);
+        console.log('\n');
+
         promptUser();
     });
 };
 
+// view all departments
 
+const viewAllDepartments = () => {
+    const query = `SELECT department.id AS "Department ID", department.name AS Department FROM employees_db.department`;
 
+    connection.query(query, (error, results) => {
+        if (error) throw error;
 
+        console.log('\n');
+        console.table(results);
+        console.log('\n');
 
+        promptUser();
+    });
+};
+
+// view all roles
+
+const viewAllRoles = () => {
+    const query = `SELECT job.id AS "Role ID", job.title AS Role, job.salary AS Salary, job.department_id AS "Department ID" FROM employees_db.role`;
+
+    connection.query(query, (error, results) => {
+        if (error) throw error;
+
+        console.log('\n');
+        console.table(results);
+        console.log('\n');
+
+        promptUser();
+    });
+};
+
+// ---ADD FUNCTIONS---
 
 //start of app
 //prompt user for action
@@ -58,7 +90,7 @@ const promptUser = () => {
                 "Add role",
                 "Update employee role",
                 "Budget Used",
-                "Quit",
+                "Exit",
             ]
         }
     ])
