@@ -12,7 +12,7 @@
     
 ## Description
 
-Employee management system that uses MySQL database to keep track of employee data, including employee name, job role, department, and salary.
+Employee management system that uses MySQL database to keep track of employee data, including employee name, job role, department, and salary using inquirer through command prompt.
 
 ## Video
 
@@ -24,7 +24,7 @@ VIDEO LINK HERE
 
 Please follow the instructions below:
 
-* Step 1 - Clone Repo. 
+* Step 1 - Clone Repo.
 * Step 2 - open terminal in clone directory.
 
 ## Getting Started
@@ -33,7 +33,8 @@ Please follow the instructions below:
 ``` 
 npm run start
 ```
-SCREENSHOT HERE
+![image](https://user-images.githubusercontent.com/60657981/177055826-fc709502-7328-4926-b9cb-b9c0039de1da.png)
+
 
 ## License
 [![License: MIT](https://img.shields.io/badge/MIT-License-green)](https://opensource.org/licenses/MIT)
