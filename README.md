@@ -18,7 +18,7 @@ Employee management system that uses MySQL database to keep track of employee da
 
 Video of full functionality of app.
 
-VIDEO LINK HERE
+[VIDEO LINK](https://drive.google.com/file/d/17s8sICW6EecfrIIVjux9kC4UleXDLqPd/view?usp=sharing)
 
 ## Installation
 
