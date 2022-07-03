@@ -73,6 +73,69 @@ const viewAllRoles = () => {
 
 // ---ADD FUNCTIONS---
 
+//add employee
+
+const addEmployee = async () => {
+
+    connection.query(`SELECT * FROM job`, async (error, jobs) => {
+        if (error) throw error;
+
+        connection.query(`SELECT * FROM employee WHERE manager_id IS NULL`, async (error, managers) => {
+            if (error) throw error;
+
+            managers = managers.map(manager => ({name:manager.first_name + " " + manager.last_name, value: manager.id}));
+            managers.push({name:"N/A"});
+
+            const questions = await inquirer
+                .prompt([
+                    {
+                        type: "input",
+                        name: "first_name",
+                        message: "What is the employee's first name?"
+                    },
+                    {
+                        type: "input",
+                        name: "last_name",
+                        message: "What is the employee's last name?"
+                    },
+                    {
+                        type: "list",
+                        name: "role_id",
+                        message: "What is the employee's role?",
+                        choices: jobs.map(job => ({name:job.title, value: job.id}))
+                    },
+                    {
+                        type: "list",
+                        name: "manager_id",
+                        message: "Who is the employee's manager?",
+                        choices: managers
+                    }
+                ]);
+
+                if (questions.manager_id === "N/A") {
+                    questions.manager_id = null;
+                };
+
+                connection.query(
+                    `INSERT INTO employee SET ?`,
+                    {
+                        first_name: questions.first_name,
+                        last_name: questions.last_name,
+                        job_id: questions.job_id,
+                        manager_id: questions.manager_id
+                    },
+                    (error) => {
+                        if (error) throw error;
+
+                        console.log("Employee added successfully!");
+                        promptUser();
+                    });
+        });
+    });
+};
+
+
+
 //start of app
 //prompt user for action
 const promptUser = () => {
