@@ -91,7 +91,7 @@ const addEmployee = async () => {
                     },
                     {
                         type: "list",
-                        name: "role_id",
+                        name: "job_id",
                         message: "What is the employee's role?",
                         choices: jobs.map(job => ({name:job.title, value: job.id}))
                     },
@@ -132,7 +132,7 @@ const addEmployee = async () => {
 // add department
 const addDepartment = async () => {
     
-    const questions = await inquirer
+    const departmentName = await inquirer
     .prompt([
         {
             type: "input",
@@ -144,7 +144,7 @@ const addDepartment = async () => {
     connection.query(
         `INSERT INTO employees_db.department SET ?`,
         {
-            name: questions.newDepartment
+            department_name: departmentName.newDepartment
         },
 
         (error) => {
@@ -194,12 +194,12 @@ const addRole = async () => {
             type: "list",
             name: "newDepartment",
             message: "What is the new role's department?",
-            choices: departments.map(department => department.name),
+            choices: departments.map(department => department.department_name),
         }
     ]);
 
     departments.forEach(department => {
-        if (department.name === questions.newDepartment) {
+        if (department.department_name === questions.newDepartment) {
             questions.newDepartment = department.id;
         }
     });
