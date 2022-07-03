@@ -14,6 +14,34 @@ connection.connect((error) => {
     promptUser();
 });
 
+// ---VIEW FUNCTIONS---
+
+//view all employees
+const viewAllEmployees = () => {
+    const query = `
+    SELECT e.id, e.first_name, e.last_name, role.title, department.name AS department, salary, IFNULL(concat(m.first_name, ' ', m.last_name), 'N/A') AS manager
+    FROM employee e
+    LEFT JOIN employee m
+    ON m.id = e.manager_id
+    JOIN role
+    ON e.role_id = role.id
+    JOIN department
+    ON role.department_id = department.id;`
+
+    connection.query(query, (error, results) => {
+        if (error) throw error;
+
+        console.table(results);
+        promptUser();
+    });
+};
+
+
+
+
+
+
+//start of app
 //prompt user for action
 const promptUser = () => {
     inquirer.prompt([
