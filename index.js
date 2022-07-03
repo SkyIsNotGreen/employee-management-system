@@ -342,7 +342,7 @@ const updateEmployeeRole = async () => {
     if (error) throw error;
 
     console.log('\n');
-    console.log("Connected to database");
+    console.log("Welcome to the Employee Tracker!");
     console.log('\n');
 
     promptUser();
