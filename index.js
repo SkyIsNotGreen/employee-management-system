@@ -1,32 +1,22 @@
 // dependencies
-const mysql2 = require("mysql2");
+const mysql = require("mysql2");
 const inquirer = require("inquirer");
 const consoleTable = require("console.table");
 const connection = require("./src/db/config/dbConnection");
 
-
-//connect to database
-connection.connect((error) => {
-    if (error) throw error;
-
-    console.log("Connected to database");
-
-    promptUser();
-});
-
-// ---VIEW FUNCTIONS---
+//---------------------------------VIEW FUNCTIONS---------------------------------
 
 // view all employees
 const viewAllEmployees = () => {
     const query = `
-    SELECT e.id, e.first_name, e.last_name, role.title, department.name AS department, salary, IFNULL(concat(m.first_name, ' ', m.last_name), 'N/A') AS manager
+    SELECT e.id, e.first_name, e.last_name, job.title, department.department_name AS department, salary, IFNULL(concat(m.first_name, ' ', m.last_name), 'N/A') AS manager
     FROM employee e
     LEFT JOIN employee m
     ON m.id = e.manager_id
-    JOIN role
-    ON e.role_id = role.id
+    JOIN job
+    ON e.job_id = job.id
     JOIN department
-    ON role.department_id = department.id;`
+    ON job.department_id = department.id;`
 
     connection.query(query, (error, results) => {
         if (error) throw error;
@@ -41,7 +31,9 @@ const viewAllEmployees = () => {
 
 // view all departments
 const viewAllDepartments = () => {
-    const query = `SELECT department.id AS "Department ID", department.name AS Department FROM employees_db.department`;
+    const query = `
+    SELECT department.id AS "Department ID", department.department_name AS Department 
+    FROM employees_db.department`;
 
     connection.query(query, (error, results) => {
         if (error) throw error;
@@ -53,10 +45,12 @@ const viewAllDepartments = () => {
         promptUser();
     });
 };
-
+  
 // view all roles
 const viewAllRoles = () => {
-    const query = `SELECT job.id AS "Role ID", job.title AS Role, job.salary AS Salary, job.department_id AS "Department ID" FROM employees_db.role`;
+    const query = `
+    SELECT job.id AS "Role ID", job.title AS Role, job.salary AS Salary, job.department_id AS "Department ID" 
+    FROM employees_db.job`;
 
     connection.query(query, (error, results) => {
         if (error) throw error;
@@ -68,8 +62,8 @@ const viewAllRoles = () => {
         promptUser();
     });
 };
-
-// ---ADD FUNCTIONS---
+  
+//---------------------------------ADD FUNCTIONS---------------------------------
 
 // add employee
 const addEmployee = async () => {
@@ -179,7 +173,6 @@ const getDepartments = () => {
     });
 };
 
-
 // add role
 const addRole = async () => {
     //wait for getDepartments to finish
@@ -230,65 +223,127 @@ const addRole = async () => {
         });
 };
 
+//---------------------------------UPDATE FUNCTIONS---------------------------------
 
+// update employee role
 
+const updateEmployeeRole = async () => {
 
+    connection.query(`SELECT * FROM employee`, async (error, employees) => {
+        if (error) throw error;
 
+        const selectedEmployee = await inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "employee_id",
+                message: "Which employee's role would you like to update?",
+                choices: employees.map(employee => ({name:employee.first_name + " " + employee.last_name, value: employee.id}))
+            }
+        ]);
 
+        connection.query(`SELECT * FROM job`, async (error, jobs) => {
+            if (error) throw error;
 
+            const selectedRole = await inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "job_id",
+                    message: "What is the employee's new role?",
+                    choices: jobs.map(job => ({name:job.title, value: job.id}))
+                }
+            ]);
 
-// start of app
-// prompt user for action
-const promptUser = () => {
-    inquirer.prompt([
-        {
-            type: "list",
-            name: "action",
-            message: "What would you like to do?",
-            choices: [
-                "View all employees",
-                "View all departments",
-                "View all roles",
-                "Add employee",
-                "Add department",
-                "Add role",
-                "Update employee role",
-                "Budget Used",
-                "Exit",
-            ]
-        }
-    ])
-    .then((response) => {
-        switch (response.choice) {
-            case "View all employees":
-              viewAllEmployees();
-              break;
-            case "View all departments":
-              viewAllDepartments();
-              break;
-            case "View all roles":
-              viewAllRoles();
-              break;
-            case "Add employee":
-              addEmployee();
-              break;
-            case "Add department":
-              addDepartment();
-              break;
-            case "Add role":
-              addRole();
-              break;
-            case "Update employee role":
-              updateEmployeeRole();
-              break;
-            case "Budget Used":
-              usedBudget();
-              break;
-            case "Exit":
-              connection.end();
-              break;
-            default:
-              throw new Error("invalid initial user choice");
-          }
+            connection.query(
+                `UPDATE employees_db.employee SET ? WHERE ?`,
+                [
+                    {
+                        job_id: selectedRole.job_id
+                    },
+                    {
+                        id: selectedEmployee.employee_id
+                    }
+                ],
+
+                (error) => {
+                    if (error) throw error;
+
+                    console.log('\n');
+                    console.log("Employee role updated successfully!");
+                    console.log('\n');
+
+                    promptUser();
+                });
         });
-    };
+    });
+};
+
+
+                
+
+
+  
+//---------------------------------START---------------------------------
+  
+  const promptUser = () => {
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "What would you like to do? ",
+          choices: [
+            "View all employees",
+            "View all departments",
+            "View all roles",
+            "Add employee",
+            "Add department",
+            "Add role",
+            "Update employee role",
+            "Exit",
+          ],
+          name: "choice",
+        },
+      ])
+      .then((response) => {
+        
+        switch (response.choice) {
+          case "View all employees":
+            viewAllEmployees();
+            break;
+          case "View all departments":
+            viewAllDepartments();
+            break;
+          case "View all roles":
+            viewAllRoles();
+            break;
+          case "Add employee":
+            addEmployee();
+            break;
+          case "Add department":
+            addDepartment();
+            break;
+          case "Add role":
+            addRole();
+            break;
+          case "Update employee role":
+            updateEmployeeRole();
+            break;
+          case "Exit":
+            connection.end();
+            break;
+          default:
+            throw new Error("invalid initial user choice");
+        }
+      });
+  };
+  
+  connection.connect((error) => {
+    if (error) throw error;
+
+    console.log('\n');
+    console.log("Connected to database");
+    console.log('\n');
+
+    promptUser();
+});
