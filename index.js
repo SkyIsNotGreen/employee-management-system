@@ -40,7 +40,6 @@ const viewAllEmployees = () => {
 };
 
 // view all departments
-
 const viewAllDepartments = () => {
     const query = `SELECT department.id AS "Department ID", department.name AS Department FROM employees_db.department`;
 
@@ -56,7 +55,6 @@ const viewAllDepartments = () => {
 };
 
 // view all roles
-
 const viewAllRoles = () => {
     const query = `SELECT job.id AS "Role ID", job.title AS Role, job.salary AS Salary, job.department_id AS "Department ID" FROM employees_db.role`;
 
@@ -73,8 +71,7 @@ const viewAllRoles = () => {
 
 // ---ADD FUNCTIONS---
 
-//add employee
-
+// add employee
 const addEmployee = async () => {
 
     connection.query(`SELECT * FROM job`, async (error, jobs) => {
@@ -124,20 +121,124 @@ const addEmployee = async () => {
                         job_id: questions.job_id,
                         manager_id: questions.manager_id
                     },
+
                     (error) => {
                         if (error) throw error;
 
+                        console.log('\n');
                         console.log("Employee added successfully!");
+                        console.log('\n');
+
                         promptUser();
                     });
         });
     });
 };
 
+// add department
+const addDepartment = async () => {
+    
+    const questions = await inquirer
+    .prompt([
+        {
+            type: "input",
+            name: "newDepartment",
+            message: "What is the new department?"
+        }
+    ]);
+
+    connection.query(
+        `INSERT INTO employees_db.department SET ?`,
+        {
+            name: questions.newDepartment
+        },
+
+        (error) => {
+            if (error) throw error;
+
+            console.log('\n');
+            console.log("Department added successfully!");
+            console.log('\n');
+
+            promptUser();
+        });
+};
+
+// fetch departments for addRole function
+const getDepartments = () => {
+
+    return new Promise((resolve, reject) => {
+
+        const query = `SELECT * FROM employees_db.department`;
+
+        connection.query(query, (error, results) => {
+            if (error) reject(error);
+
+            resolve(results);
+        });
+    });
+};
 
 
-//start of app
-//prompt user for action
+// add role
+const addRole = async () => {
+    //wait for getDepartments to finish
+    const departments = await getDepartments();
+
+    const questions = await inquirer
+    .prompt([
+        {
+            type: "input",
+            name: "newRole",
+            message: "What is the new role?"
+        },
+        {
+            type: "input",
+            name: "newSalary",
+            message: "What is the new role's salary?"
+        },
+        {
+            type: "list",
+            name: "newDepartment",
+            message: "What is the new role's department?",
+            choices: departments.map(department => department.name),
+        }
+    ]);
+
+    departments.forEach(department => {
+        if (department.name === questions.newDepartment) {
+            questions.newDepartment = department.id;
+        }
+    });
+
+    connection.query(
+        `INSERT INTO employees_db.job SET ?`,
+        {
+            title: questions.newRole,
+            salary: questions.newSalary,
+            department_id: questions.newDepartment
+        },
+
+        (error) => {
+            if (error) throw error;
+
+            console.log('\n');
+            console.log("Role added successfully!");
+            console.log('\n');
+
+            promptUser();
+        });
+};
+
+
+
+
+
+
+
+
+// start of app
+// prompt user for action
 const promptUser = () => {
     inquirer.prompt([
         {
